@@ -4,7 +4,7 @@ function Load-DotEnv {
     )
 
     if (-Not (Test-Path $Path)) {
-        Write-Warning "$Path が見つかりません。"
+        Write-Warning "$Path not found."
         return
     }
 
@@ -18,7 +18,7 @@ function Load-DotEnv {
     }
 }
 
-# .env 読み込み
+# Load from .env
 Load-DotEnv
 
 param (
@@ -31,42 +31,42 @@ param (
     [string]$envName = $env:ENV
 )
 
-# 値の確認と補正
+# Check and set values
 if (-not $tag) {
-    Write-Error "必須の引数が不足しています。-tag は指定するか、.env に定義してください。"
+    Write-Error "Required argument is missing. -tag must be specified or defined in .env."
     exit 1
 }
 if (-not $registryPrefix) {
-    Write-Error "REGISTRY_PREFIX が .env に定義されていません。"
+    Write-Error "REGISTRY_PREFIX is not defined in .env."
     exit 1
 }
 if (-not $envName) {
     $envName = "stg"
 }
 
-# カレントディレクトリから WAR ファイルを検索
+# Search for WAR file in the current directory
 $warPattern = "$repository-$tag-.*_$envName\.war"
 $matchedFiles = Get-ChildItem -Path . -File | Where-Object { $_.Name -match $warPattern }
 
 if (-not $matchedFiles) {
-    Write-Error "カレントディレクトリに WAR ファイルが見つかりません。"
+    Write-Error "WAR file not found in the current directory."
     exit 1
 }
 
 $war = $matchedFiles[0].Name
 
 if ($matchedFiles.Count -gt 1) {
-    Write-Warning "複数の WAR ファイルが見つかりました。最初のファイルを使用します: $war"
+    Write-Warning "Multiple WAR files found. Using the first one: $war"
 } else {
-    Write-Host "WAR ファイルを検出しました: $war"
+    Write-Host "WAR file detected: $war"
 }
 
-# ACR イメージ構築情報
+# ACR image build info
 $resourceGroup = "${resourceGroupPrefix}${envName}${resourceGroupSuffix}"
 $registry = "${registryPrefix}${envName}"
 $image = "${registry}${registryHostSuffix}/${repository}:${tag}"
 
-# ACR build 実行
+# Run ACR build
 az acr build -g $resourceGroup --registry $registry `
   -t $image `
   --build-arg WAR_FILE_NAME=$war `
