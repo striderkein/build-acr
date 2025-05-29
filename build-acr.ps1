@@ -32,6 +32,16 @@ function main {
     # Load .env
     Load-DotEnv
 
+    # console output required variables
+    Write-Host "Using the following parameters from .env:"
+    Write-Host "tag: $tag"
+    Write-Host "registryPrefix: $registryPrefix"
+    Write-Host "resourceGroupPrefix: $resourceGroupPrefix"
+    Write-Host "resourceGroupSuffix: $resourceGroupSuffix"
+    Write-Host "registryHostSuffix: $registryHostSuffix"
+    Write-Host "repository: $repository"
+    Write-Host "envName: $envName"
+
     # Validate values
     if (-not $tag) {
         Write-Error "Required argument is missing. -tag must be specified or defined in .env."
