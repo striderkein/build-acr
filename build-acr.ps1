@@ -46,7 +46,7 @@ function main {
     }
 
     # Search for WAR file
-    $warPattern = "$repository-$tag-.*_$envName\.war"
+    $warPattern = "$repository-.*_$envName\.war"
     $matchedFiles = Get-ChildItem -Path . -File | Where-Object { $_.Name -imatch $warPattern }
 
     if (-not $matchedFiles) {
