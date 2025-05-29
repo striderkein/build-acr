@@ -38,9 +38,20 @@ ENV=<YOUR_ENV>
 **4. 実行**
 
 ```ps
+# カレントディレクトリのWARファイルを指定
+.\build-acr.ps1 -war "awesome-app-0.0.1-SNAPSHOT_STG.war"
+
+# 相対パスでサブディレクトリのWARファイルを指定
+.\build-acr.ps1 -war "target/awesome-app-0.0.4-SNAPSHOT_STG.war"
+
+# 相対パスで親ディレクトリのWARファイルを指定
+.\build-acr.ps1 -war "../build/awesome-app-0.0.4-SNAPSHOT_STG.war"
+
+# 引数 war を渡さずに実行した場合はカレントディレクトリの WAR をターゲットにする
 .\build-acr.ps1
 ```
 
+**実行時にエラーが出るときは**
 「スクリプトの実行が無効になっているため…」というエラーが出るときは下記コマンドを実行してから再実行する必要あり。
 ```ps
 ＞ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
