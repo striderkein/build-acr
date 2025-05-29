@@ -47,7 +47,7 @@ function main {
 
     # Search for WAR file
     $warPattern = "$repository-$tag-.*_$envName\.war"
-    $matchedFiles = Get-ChildItem -Path . -File | Where-Object { $_.Name -match $warPattern }
+    $matchedFiles = Get-ChildItem -Path . -File | Where-Object { $_.Name -imatch $warPattern }
 
     if (-not $matchedFiles) {
         Write-Error "WAR file not found in the current directory."
