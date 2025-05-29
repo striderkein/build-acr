@@ -26,7 +26,8 @@ function main {
         [string]$registryHostSuffix = $env:REGISTRY_HOST_SUFFIX,
         [string]$repository = $env:REPOSITORY,
         [string]$tag = $env:TAG,
-        [string]$envName = $env:ENV
+        [string]$envName = $env:ENV,
+        [string]$war
     )
 
     # Load .env
@@ -41,6 +42,9 @@ function main {
     Write-Host "registryHostSuffix: $registryHostSuffix"
     Write-Host "repository: $repository"
     Write-Host "envName: $envName"
+    if ($war) {
+        Write-Host "war: $war (specified as argument)"
+    }
 
     # Validate values
     if (-not $tag) {
@@ -55,21 +59,32 @@ function main {
         $envName = "stg"
     }
 
-    # Search for WAR file
-    $warPattern = "$repository-.*_$envName\.war"
-    $matchedFiles = Get-ChildItem -Path . -File | Where-Object { $_.Name -imatch $warPattern }
-
-    if (-not $matchedFiles) {
-        Write-Error "WAR file not found in the current directory."
-        exit 1
-    }
-
-    $war = $matchedFiles[0].Name
-
-    if ($matchedFiles.Count -gt 1) {
-        Write-Warning "Multiple WAR files found. Using the first one: $war"
+    # WAR file handling
+    if ($war) {
+        # Use specified WAR file (relative path allowed)
+        if (-not (Test-Path $war)) {
+            Write-Error "Specified WAR file not found: $war"
+            exit 1
+        }
+        $war = Split-Path -Leaf $war  # Get just the filename for build arg
+        Write-Host "Using specified WAR file: $war"
     } else {
-        Write-Host "WAR file detected: $war"
+        # Search for WAR file in current directory
+        $warPattern = "$repository-.*_$envName\.war"
+        $matchedFiles = Get-ChildItem -Path . -File | Where-Object { $_.Name -imatch $warPattern }
+
+        if (-not $matchedFiles) {
+            Write-Error "WAR file not found in the current directory."
+            exit 1
+        }
+
+        $war = $matchedFiles[0].Name
+
+        if ($matchedFiles.Count -gt 1) {
+            Write-Warning "Multiple WAR files found. Using the first one: $war"
+        } else {
+            Write-Host "WAR file detected: $war"
+        }
     }
 
     # ACR image build info
