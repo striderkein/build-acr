@@ -1,4 +1,4 @@
-function Load-DotEnv {
+﻿function Load-DotEnv {
     param (
         [string]$Path = ".env"
     )
