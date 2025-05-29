@@ -13,20 +13,37 @@ Azure Container Registry (ACR) でコンテナイメージをビルドするた�
 
 ### ps
 
-setting up `.env` as below
+**1. .env.example をコピーする**
+```ps
+cp .env.examle .env
 ```
+
+**2. `.env` を設定する**
+
+```ps
 REGISTRY_PREFIX=<YOUR_REGISTRY_PREFIX>
 RESOURCE_GROUP_PREFIX=<YOUR_RESOURCE_GROUP_PREFIX>
 RESOURCE_GROUP_SUFFIX=<YOUR_RESOURCE_GROUP_SUFFIX>
 REGISTRY_HOST_SUFFIX=<REGISTRY_HOST_SUFFIX>
 REPOSITORY=<REPOSITORY>
 TAG=<YOUR_TAG>
-WAR=<YOUR_ARTIFACT_NAME>
 ENV=<YOUR_ENV>
 ```
 
+**3. Dockerfile, init.sh を配置する**
+`build-acr.ps1` と同じディレクトリに下記を配置する
+- Dockerfile
+- init.sh
+
+**4. 実行**
+
 ```ps
 .\build-acr.ps1
+```
+
+「スクリプトの実行が無効になっているため…」というエラーが出るときは下記コマンドを実行してから再実行する必要あり。
+```ps
+＞ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
 
 ### sh
