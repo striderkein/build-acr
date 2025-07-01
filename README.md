@@ -2,12 +2,30 @@
 
 Azure Container Registry (ACR) でコンテナイメージをビルドするためのスクリプトです。
 
+## How to start
+
+**HTTP**
+```sh
+git clone https://github.com/striderkein/build-acr.git
+```
+**SSH**
+```sh
+git clone git@github.com:striderkein/build-acr.git
+```
+
+シェルスクリプト版を使いたい場合は `b` オプションを使用して下記のように:
+```sh
+# HTTP
+git clone -b bash https://github.com/striderkein/build-acr.git
+# SSH
+git clone -b bash git@github.com:striderkein/build-acr.git
+```
+
 ## 直接ダウンロード
 
 以下のリンクをクリックすると、スクリプトを直接ダウンロードできます：
 
 - [build-acr.ps1 をダウンロード](https://raw.githubusercontent.com/striderkein/build-acr/main/build-acr.ps1)
-- [build-acr.sh をダウンロード](https://raw.githubusercontent.com/striderkein/build-acr/main/build-acr.sh)
 
 ## 使い方
 
@@ -55,12 +73,6 @@ ENV=<YOUR_ENV>
 「スクリプトの実行が無効になっているため…」というエラーが出るときは下記コマンドを実行してから再実行する必要あり。
 ```ps
 ＞ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-```
-
-### sh
-
-```bash
-./build-acr.sh --tag myacr.azurecr.io/app:1.0.0 --war app-1.0.0.war --resource-group myResourceGroup --registry myAcrName
 ```
 
 ### オプション
