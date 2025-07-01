@@ -78,7 +78,8 @@ ENV=<YOUR_ENV>
 ### オプション
 
 - `-t, --tag`: イメージタグ（例：myacr.azurecr.io/app:1.0.0）
+- `-r, --repository`: リポジトリ（例: `my-app`）
 - `-w, --war`: WARファイル名（例：app-1.0.0.war）
 - `-g, --resource-group`: Azureリソースグループ名
-- `-r, --registry`: Azure Container Registry名
+- `-c, --container-registry`: Azure Container Registry名
 - `-h, --help`: ヘルプメッセージを表示

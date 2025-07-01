@@ -1,4 +1,53 @@
-﻿function Load-DotEnv {
+﻿param(
+    [Alias("t", "tag")]
+    [string]$ImageTag,
+    
+    [Alias("r", "repository")]
+    [string]$Repository,
+    
+    [Alias("w", "war")]
+    [string]$WarFile,
+    
+    [Alias("g", "resource-group")]
+    [string]$ResourceGroup,
+    
+    [Alias("c", "container-registry")]
+    [string]$ContainerRegistry,
+    
+    [Alias("h", "help")]
+    [switch]$Help
+)
+
+# ヘルプメッセージを表示する関数
+function Show-Help {
+    Write-Host @"
+Azure Container Registry (ACR) でコンテナイメージをビルドするためのスクリプト
+
+使用方法:
+    .\build-acr.ps1 [オプション]
+
+オプション:
+    -t, --tag               イメージタグ（例：myacr.azurecr.io/app:1.0.0）
+    -r, --repository        リポジトリ（例: my-app）
+    -w, --war               WARファイル名（例：app-1.0.0.war）
+    -g, --resource-group    Azureリソースグループ名
+    -c, --container-registry Azure Container Registry名
+    -h, --help              ヘルプメッセージを表示
+
+例:
+    .\build-acr.ps1 -w "app-1.0.0.war" -t "myacr.azurecr.io/app:1.0.0"
+    .\build-acr.ps1 --war "target/app.war" --tag "1.0.0"
+    .\build-acr.ps1 -h
+"@
+}
+
+# ヘルプが要求された場合は表示して終了
+if ($Help) {
+    Show-Help
+    exit 0
+}
+
+function Load-DotEnv {
     param (
         [string]$Path = ".env"
     )
@@ -24,17 +73,27 @@ function main {
         [string]$resourceGroupPrefix = $env:RESOURCE_GROUP_PREFIX,
         [string]$resourceGroupSuffix = $env:RESOURCE_GROUP_SUFFIX,
         [string]$registryHostSuffix = $env:REGISTRY_HOST_SUFFIX,
-        [string]$repository = $env:REPOSITORY,
-        [string]$tag = $env:TAG,
+        [string]$repository,
+        [string]$tag,
         [string]$envName = $env:ENV,
-        [string]$war
+        [string]$war,
+        [string]$resourceGroup,
+        [string]$registry
     )
 
     # Load .env
     Load-DotEnv
 
+    # コマンドライン引数で渡された値を優先して設定
+    if (-not $repository) {
+        $repository = $env:REPOSITORY
+    }
+    if (-not $tag) {
+        $tag = $env:TAG
+    }
+
     # console output required variables
-    Write-Host "Using the following parameters from .env:"
+    Write-Host "Using the following parameters:"
     Write-Host "tag: $tag"
     Write-Host "registryPrefix: $registryPrefix"
     Write-Host "resourceGroupPrefix: $resourceGroupPrefix"
@@ -45,14 +104,24 @@ function main {
     if ($war) {
         Write-Host "war: $war (specified as argument)"
     }
+    if ($resourceGroup) {
+        Write-Host "resourceGroup: $resourceGroup (specified as argument)"
+    }
+    if ($registry) {
+        Write-Host "registry: $registry (specified as argument)"
+    }
 
     # Validate values
     if (-not $tag) {
         Write-Error "Required argument is missing. -tag must be specified or defined in .env."
         exit 1
     }
-    if (-not $registryPrefix) {
-        Write-Error "REGISTRY_PREFIX is not defined in .env."
+    if (-not $repository) {
+        Write-Error "Required argument is missing. -repository must be specified or defined in .env."
+        exit 1
+    }
+    if (-not $registryPrefix -and -not $registry) {
+        Write-Error "REGISTRY_PREFIX is not defined in .env or -container-registry is not specified."
         exit 1
     }
     if (-not $envName) {
@@ -88,9 +157,23 @@ function main {
     }
 
     # ACR image build info
-    $resourceGroup = "${resourceGroupPrefix}${envName}${resourceGroupSuffix}"
-    $registry = "${registryPrefix}${envName}"
-    $image = "${registry}${registryHostSuffix}/${repository}:${tag}"
+    if (-not $resourceGroup) {
+        $resourceGroup = "${resourceGroupPrefix}${envName}${resourceGroupSuffix}"
+    }
+    if (-not $registry) {
+        $registry = "${registryPrefix}${envName}"
+    }
+    
+    # イメージタグの処理：完全なタグが指定されている場合はそのまま使用、そうでなければ構築
+    if ($tag -like "*azurecr.io*" -or $tag -like "*/*") {
+        $image = $tag
+    } else {
+        $image = "${registry}${registryHostSuffix}/${repository}:${tag}"
+    }
+
+    Write-Host "Building image: $image"
+    Write-Host "Resource Group: $resourceGroup"
+    Write-Host "Registry: $registry"
 
     # Run ACR build
     az acr build -g $resourceGroup --registry $registry `
@@ -101,4 +184,5 @@ function main {
     Read-Host "Press enter to continue..."
 }
 
-main
+# メイン処理の実行
+main -repository $Repository -tag $ImageTag -war $WarFile -resourceGroup $ResourceGroup -registry $ContainerRegistry
