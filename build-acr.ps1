@@ -69,13 +69,13 @@ function Load-DotEnv {
 
 function main {
     param (
-        [string]$registryPrefix = $env:REGISTRY_PREFIX,
-        [string]$resourceGroupPrefix = $env:RESOURCE_GROUP_PREFIX,
-        [string]$resourceGroupSuffix = $env:RESOURCE_GROUP_SUFFIX,
-        [string]$registryHostSuffix = $env:REGISTRY_HOST_SUFFIX,
+        [string]$registryPrefix,
+        [string]$resourceGroupPrefix,
+        [string]$resourceGroupSuffix,
+        [string]$registryHostSuffix,
         [string]$repository,
         [string]$tag,
-        [string]$envName = $env:ENV,
+        [string]$envName,
         [string]$war,
         [string]$resourceGroup,
         [string]$registry
@@ -83,6 +83,23 @@ function main {
 
     # Load .env
     Load-DotEnv
+
+    # .env ファイルの値を設定（引数が指定されていない場合のみ）
+    if (-not $registryPrefix) {
+        $registryPrefix = $env:REGISTRY_PREFIX
+    }
+    if (-not $resourceGroupPrefix) {
+        $resourceGroupPrefix = $env:RESOURCE_GROUP_PREFIX
+    }
+    if (-not $resourceGroupSuffix) {
+        $resourceGroupSuffix = $env:RESOURCE_GROUP_SUFFIX
+    }
+    if (-not $registryHostSuffix) {
+        $registryHostSuffix = $env:REGISTRY_HOST_SUFFIX
+    }
+    if (-not $envName) {
+        $envName = $env:ENV
+    }
 
     # コマンドライン引数で渡された値を優先して設定
     if (-not $repository) {
