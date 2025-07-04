@@ -2,7 +2,7 @@
     [Alias("t", "tag")]
     [string]$ImageTag,
     
-    [Alias("r", "repository")]
+    [Alias("r", "repo")]
     [string]$Repository,
     
     [Alias("w", "war")]
@@ -14,7 +14,7 @@
     [Alias("c", "container-registry")]
     [string]$ContainerRegistry,
     
-    [Alias("h", "help")]
+    [Alias("h")]
     [switch]$Help
 )
 
@@ -28,11 +28,11 @@ Azure Container Registry (ACR) でコンテナイメージをビルドするた�
 
 オプション:
     -t, --tag               イメージタグ（例：myacr.azurecr.io/app:1.0.0）
-    -r, --repository        リポジトリ（例: my-app）
+    -r, --repo              リポジトリ（例: my-app）
     -w, --war               WARファイル名（例：app-1.0.0.war）
     -g, --resource-group    Azureリソースグループ名
     -c, --container-registry Azure Container Registry名
-    -h, --help              ヘルプメッセージを表示
+    -h                      ヘルプメッセージを表示
 
 例:
     .\build-acr.ps1 -w "app-1.0.0.war" -t "myacr.azurecr.io/app:1.0.0"
@@ -117,11 +117,11 @@ function main {
         exit 1
     }
     if (-not $repository) {
-        Write-Error "Required argument is missing. -repository must be specified or defined in .env."
+        Write-Error "Required argument is missing. -r (--repo) must be specified or defined in .env."
         exit 1
     }
     if (-not $registryPrefix -and -not $registry) {
-        Write-Error "REGISTRY_PREFIX is not defined in .env or -container-registry is not specified."
+        Write-Error "REGISTRY_PREFIX is not defined in .env or -c (--container-registry) is not specified."
         exit 1
     }
     if (-not $envName) {
