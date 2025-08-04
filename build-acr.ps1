@@ -13,7 +13,10 @@
     
     [Alias("c", "container-registry")]
     [string]$ContainerRegistry,
-    
+
+    [Alias("f", "dockerfile")]
+    [string]$DockerfileDir = ".",
+
     [Alias("h")]
     [switch]$Help
 )
@@ -32,11 +35,12 @@ Azure Container Registry (ACR) でコンテナイメージをビルドするた�
     -w, --war               WARファイル名（例：app-1.0.0.war）
     -g, --resource-group    Azureリソースグループ名
     -c, --container-registry Azure Container Registry名
+    -f, --dockerfile        Dockerfileの存在するディレクトリ（デフォルト: .）
     -h                      ヘルプメッセージを表示
 
 例:
     .\build-acr.ps1 -w "app-1.0.0.war" -t "myacr.azurecr.io/app:1.0.0"
-    .\build-acr.ps1 --war "target/app.war" --tag "1.0.0"
+    .\build-acr.ps1 --war "target/app.war" --tag "1.0.0" --dockerfile "dir/of/dockerfile"
     .\build-acr.ps1 -h
 "@
 }
@@ -78,6 +82,7 @@ function main {
         [string]$envName,
         [string]$war,
         [string]$resourceGroup,
+        [string]$dockerfileDir,
         [string]$registry
     )
 
@@ -108,6 +113,8 @@ function main {
     if (-not $tag) {
         $tag = $env:TAG
     }
+
+    $dockerfilePath = $dockerfileDir + "/Dockerfile"
 
     # console output required variables
     Write-Host "Using the following parameters:"
@@ -195,6 +202,7 @@ function main {
     # Run ACR build
     az acr build -g $resourceGroup --registry $registry `
       -t $image `
+      -f $dockerfilePath `
       --build-arg WAR_FILE_NAME=$war `
       ./
 
@@ -202,4 +210,4 @@ function main {
 }
 
 # メイン処理の実行
-main -repository $Repository -tag $ImageTag -war $WarFile -resourceGroup $ResourceGroup -registry $ContainerRegistry
+main -repository $Repository -tag $ImageTag -war $WarFile -resourceGroup $ResourceGroup -registry $ContainerRegistry -dockerfileDir $DockerfileDir
